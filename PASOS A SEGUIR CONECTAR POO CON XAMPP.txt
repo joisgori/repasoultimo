@@ -1,0 +1,140 @@
+//PASO CERO INSERTAR LA LIBRERÍA... Y TENER CUIDADO DEL NOMBRE DE LA BASE DE DATOS Y TABLA QUE CREARÉ
+//PASO CERO PUNTO CINCO
+//CREAR EL FRAME CON TODOS LOS LABELS Y NOMBRES DE VARIABLES DE LOS MISMOS Y BOTONES Y COMBOBOXES Y TEXTFIELDS...
+//PRIMER PASO
+    //JUSTO ABAJO DEL FRAME Y ANTES DEL CONSTRUCTOR DEFINO MIS VARIABLES ESTÁTICAS FINALES (CONSTANTES) 
+    public static final String url = "jdbc:mysql://localhost/examenf";  //Al final de la última pleca irá el nombre de la base de datos que queremos llamar.;
+    public static final String user = "root";  //usario default
+    public static final String pass = ""; //Constraseña default
+
+    //Variables para preparar consulta
+    PreparedStatement ps;
+    ResultSet rs;
+
+//********************SEGUNDO PASOOOO****************************
+// PASO CREACIÓN DE METODO PUBLICO ESTÁTICO DE TIPO CONNECTION GETCONECTION 
+public static Connection getConnection() {
+    //CREO VARIABLE DE TIPO CONNECTION QUE SEA NULO
+    Connection con = null;
+    //CREO EL TRY{} CATCH() {} RETURN
+    try {
+        Class.forName("com.mysql.jdbc.Driver"); //Nos permite abrir un canal para poder establecer la comunicación con la base de datos.
+        //DriverManager.getConnection (): Devuelve un objeto Connection, el cual representa la conexión física a la base de datos.
+        //Vamos a castear al tipo "connection" el valor de vuelto solo por cualquier cosa, que se almacenará en una variable que es de tipo connection...
+        con = (Connection) DriverManager.getConnection(Conexion.url, Conexion.user, Conexion.pass); //Estos son los parámetros que recibe.
+        //ESTO ES PARA MOSTRAR EL MENSAJE DE CONEXIÓN EXITOSA
+        JOptionPane.showMessageDialog(null, "Conexión exitosa");
+    } catch (Exception e) {
+        //RECIBE UNA VARIABLE DE TIPO EXCEPTION Y LA IMPRIME SI DEBE HACERLO...
+        System.out.println(e);
+    }
+    //RETORNA LA VARIABLE DE TIPO CONNECTION
+    return con;
+}
+
+    
+//Creo un método para limpiar
+private void limpiarcajas() {
+    //Todas las cajas de texto deberán apuntar a null
+    txtNombre.setText(null);
+            //Si fuera combox, .setselectindex(0); que será donde pondré "seleccione";
+	//Acá irán todas las variables de textfild como les haya puesto con su seteo a nulo.
+}
+
+//*****************TERCER PASO*********
+//DEFINIR FUNCIONALIDAD DE LOS BOTONES
+//INSERTAR: **doble click al boton del frame y pondré esto
+        //Paso para el botón guardar
+        //DEclaro var de tipo connection
+        Connection con = null;
+        try {
+            con = getConnection();
+            ps = con.prepareStatement("INSERT INTO movie (nombre, director, pais, clasificacion, anio, en_proyeccion) VALUES(?,?,?,?,?,?)"); //Acá se coloca la consulta...
+            //Se le pone el nombre de la tabla y los campos en el orden que es...
+            //Colocamos el tipo de variable a utilizar. string, int, float, etc---
+            ps.setString(1, txtNombre.getText()); //el índice en el que se ingresará el elemento, será el nombre, y ahora el valor, que es el valor de la caja de texto nombre.
+            ps.setString(2, TxtDirector.getText());
+            ps.setString(3, TxtPais.getText());
+            ps.setString(4, TxtClas.getText());
+            ps.setString(5, TxtAnnio.getText());
+            ps.setString(6, TxtEnproyec.getText());
+            //Si fuera fecha, hay que castearla a fecha, con date --> Date.valueOf(txtLabel.getTExt)
+            //Para combobox se una un getSelectItem.toString
+
+            //Ejecutamos la consulta:
+            if (ps.executeUpdate() > 0) {
+                JOptionPane.showMessageDialog(null, "Nombre Guardado");
+                //Se llama luego de insertar
+                limpiarcajas();
+
+            } else {
+                JOptionPane.showMessageDialog(null, "Nombre NO Guardado");
+                //aún si da error:
+                limpiarcajas();
+            }
+            //SE CIERRA LA CONEXION
+            con.close();
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+
+//BOTON BUSCAR:
+Connection con = null;
+        try {
+            con = getConnection();
+	    ps = con.prepareStatement("SELECT * FROM movie WHERE nombre = ?"); //Acá se coloca la consulta de buscar
+            ps.setString(1, txtNombre.getText()); //Lo mismo, se manda a llamr el campo en su índice...
+                       
+            //Validar si trajo datos o no...
+            rs = ps.executeQuery();
+            if(rs.next()){
+                TxtPais.setText(rs.getString("pais")); //para llenar los campos de las interfaz sacados de la tabla...
+                //Si hubiera un combobox. setSelectItem(rs.getString("genero"));
+            } else {
+                JOptionPane.showMessageDialog(null, "No hay datos.");
+            }
+        } catch(Exception e){
+            System.out.println(e);
+        }
+
+//BOTON MODIFICAR:
+Connection con = null;
+        try {
+            con = getConnection();
+	    ps = con.prepareStatement("UPDATE movie SET nombre = ?, directo = ?, pais = ?, clasificacion = ?, anio = ?, en_proyeccion = ? WHERE id = ?"); //Acá se coloca la consulta DE MODIFICAR
+            ps.setString(1, txtNombre.getText()); //Lo mismo, se manda a llamr el campo en su índice...
+
+//agregamos un nuevo ps.setstring(final+1, txtId.getText());
+                       //LUEGO SOLO CAMBIO MENSAJES ...
+            //Validar si trajo datos o no...
+            rs = ps.executeUpdate();
+            if(rs.next()){
+                TxtPais.setText(rs.getString("pais")); //para llenar los campos de las interfaz sacados de la tabla...
+                //Si hubiera un combobox. setSelectItem(rs.getString("genero"));
+            } else {
+                JOptionPane.showMessageDialog(null, "No hay datos.");
+            }
+        } catch(Exception e){
+            System.out.println(e);
+        }
+
+//BOTON ELIMINAR:
+Connection con = null;
+        try {
+            con = getConnection();
+	    ps = con.prepareStatement("DELETE FROM movie WHERE id = ?"); //Acá se coloca la consulta DE MODIFICAR
+            ps.setInt(1, Integer.ParseInttxt(txtId.getText())); //Lo mismo, se manda a llamr el campo en su índice...
+ //LUEGO SOLO CAMBIO MENSAJES ...
+            //Validar si trajo datos o no...
+            rs = ps.executeUpdate();
+            if(rs.next()){
+                TxtPais.setText(rs.getString("pais")); //para llenar los campos de las interfaz sacados de la tabla...
+                //Si hubiera un combobox. setSelectItem(rs.getString("genero"));
+            } else {
+                JOptionPane.showMessageDialog(null, "No hay datos.");
+            }
+        } catch(Exception e){
+            System.out.println(e);
+        }
+//Boton limpiar:
+//mano a llamar el metodo limpiar...
